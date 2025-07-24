@@ -60,6 +60,14 @@ export default function Home() {
 					</p>
 				))}
 			</div>
+			<label className='grid gap-2 mt-4'>
+				Заметки
+				<textarea
+					name='notes'
+					id='notes'
+					className='bg-zinc-800 rounded-lg p-2'
+				></textarea>
+			</label>
 		</div>
 	)
 }
