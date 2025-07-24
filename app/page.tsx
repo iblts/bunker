@@ -16,7 +16,9 @@ export default function Home() {
 		refetchInterval: 10000,
 	})
 
-	const [text, setText] = useState(localStorage.getItem('text') ?? '')
+	const [text, setText] = useState(
+		localStorage ? localStorage.getItem('text') ?? '' : ''
+	)
 
 	return (
 		<div className='min-h-screen bg-black-50 flex flex-col p-8'>
@@ -71,7 +73,7 @@ export default function Home() {
 					value={text}
 					onChange={e => {
 						setText(e.target.value)
-						localStorage.setItem('text', e.target.value)
+						if (localStorage) localStorage.setItem('text', e.target.value)
 					}}
 					name='notes'
 					id='notes'
