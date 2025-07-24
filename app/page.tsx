@@ -17,7 +17,7 @@ export default function Home() {
 	})
 
 	const [text, setText] = useState(
-		localStorage ? localStorage.getItem('text') ?? '' : ''
+		'localStorage' in window ? localStorage.getItem('text') ?? '' : ''
 	)
 
 	return (
@@ -73,7 +73,8 @@ export default function Home() {
 					value={text}
 					onChange={e => {
 						setText(e.target.value)
-						if (localStorage) localStorage.setItem('text', e.target.value)
+						if ('localStorage' in window)
+							localStorage.setItem('text', e.target.value)
 					}}
 					name='notes'
 					id='notes'
