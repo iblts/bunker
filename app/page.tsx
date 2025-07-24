@@ -34,31 +34,33 @@ export default function Home() {
 				</p>
 			</div>
 			<div className='flex gap-10'>
-				{players?.map(player => (
-					<p className='bg-zinc-800 p-4 rounded-lg' key={player.id}>
-						Имя: {player?.name}
-						<br />
-						Пол: {player?.sex}
-						<br />
-						Профессия: {player?.profession}
-						<br />
-						Здоровье: {player?.health}
-						<br />
-						Возраст: {player?.age}
-						<br />
-						Рост: {player?.height}
-						<br />
-						характер: {player?.character}
-						<br />
-						Доп инфа: {player?.extra}
-						<br />
-						хобби: {player?.hobby}
-						<br />
-						Инвентарь: {player?.inventory}
-						<br />
-						Фобия: {player?.phobia}
-					</p>
-				))}
+				{players
+					?.sort((p1, p2) => p1.id - p2.id)
+					.map(player => (
+						<p className='bg-zinc-800 p-4 rounded-lg' key={player.id}>
+							Имя: {player?.name}
+							<br />
+							Пол: {player?.sex}
+							<br />
+							Профессия: {player?.profession}
+							<br />
+							Здоровье: {player?.health}
+							<br />
+							Возраст: {player?.age}
+							<br />
+							Рост: {player?.height}
+							<br />
+							характер: {player?.character}
+							<br />
+							Доп инфа: {player?.extra}
+							<br />
+							хобби: {player?.hobby}
+							<br />
+							Инвентарь: {player?.inventory}
+							<br />
+							Фобия: {player?.phobia}
+						</p>
+					))}
 			</div>
 			<label className='grid gap-2 mt-4'>
 				Заметки
@@ -66,6 +68,7 @@ export default function Home() {
 					name='notes'
 					id='notes'
 					className='bg-zinc-800 rounded-lg p-2'
+					style={{ height: 300 }}
 				></textarea>
 			</label>
 		</div>
