@@ -6,13 +6,13 @@ export default function Home() {
 	const { data: players } = useQuery({
 		queryKey: ['player'],
 		queryFn: getPlayers,
-		refetchInterval: 1000,
+		refetchInterval: 10000,
 	})
 
 	const { data: data } = useQuery({
 		queryKey: ['data'],
 		queryFn: getData,
-		refetchInterval: 1000,
+		refetchInterval: 10000,
 	})
 
 	return (
