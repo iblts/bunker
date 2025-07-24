@@ -1,7 +1,6 @@
 'use client'
 import { getData, getPlayers } from '@/api'
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
 
 export default function Home() {
 	const { data: players } = useQuery({
@@ -15,10 +14,6 @@ export default function Home() {
 		queryFn: getData,
 		refetchInterval: 10000,
 	})
-
-	const [text, setText] = useState(
-		'localStorage' in window ? localStorage.getItem('text') ?? '' : ''
-	)
 
 	return (
 		<div className='min-h-screen bg-black-50 flex flex-col p-8'>
@@ -70,12 +65,6 @@ export default function Home() {
 			<label className='grid gap-2 mt-4'>
 				Заметки
 				<textarea
-					value={text}
-					onChange={e => {
-						setText(e.target.value)
-						if ('localStorage' in window)
-							localStorage.setItem('text', e.target.value)
-					}}
 					name='notes'
 					id='notes'
 					className='bg-zinc-800 rounded-lg p-2'
