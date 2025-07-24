@@ -1,0 +1,19 @@
+import prisma from '@/lib/prisma'
+import { NextResponse } from 'next/server'
+
+export async function GET(request: Request) {
+	const data = await prisma.data.findFirst()
+
+	return NextResponse.json(data)
+}
+
+export async function POST(request: Request) {
+	const data = await prisma.data.update({
+		where: {
+			id: 1,
+		},
+		data: await request.json(),
+	})
+
+	return NextResponse.json(data)
+}
