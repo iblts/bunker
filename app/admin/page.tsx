@@ -53,8 +53,6 @@ export default function Admin() {
 		value: player.id,
 	}))
 
-	console.log(players)
-
 	return (
 		<div className='p-20 flex justify-evenly'>
 			<div>
@@ -118,7 +116,9 @@ export default function Admin() {
 					name='user'
 				>
 					{options?.map(option => (
-						<option value={option.value}>{option.label ?? 'Аноним'}</option>
+						<option value={option.value} key={option.value}>
+							{option.label ?? 'Аноним'}
+						</option>
 					))}
 				</select>
 
