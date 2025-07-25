@@ -12,8 +12,6 @@ export const getData = async () => {
 	const res = await fetch(`${BASE_URL}/api/data`)
 	const data = await res.json()
 
-	console.log(data)
-
 	return data as Data
 }
 
@@ -30,6 +28,15 @@ export const updateData = async (body: Omit<Data, 'id'>) => {
 export const createPlayer = async () => {
 	const res = await fetch(`${BASE_URL}/api/players`, {
 		method: 'POST',
+	})
+	const data = await res.json()
+
+	return data as Data
+}
+
+export const deletePlayer = async (id: number) => {
+	const res = await fetch(`${BASE_URL}/api/players/${id}`, {
+		method: 'DELETE',
 	})
 	const data = await res.json()
 
