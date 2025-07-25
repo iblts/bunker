@@ -8,13 +8,16 @@ import {
 	updateData,
 	updatePlayer,
 } from '@/api'
+import { PASSWORD } from '@/constants'
 import { Data, Player } from '@/lib/generated/prisma-client'
 import { queryClient } from '@/lib/query'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 export default function Admin() {
+	const router = useRouter()
 	const { data: players } = useQuery({
 		queryKey: ['player'],
 		queryFn: getPlayers,
@@ -29,16 +32,10 @@ export default function Admin() {
 	const {
 		register: dataRegister,
 		handleSubmit: handleDataSubmit,
-		formState: { errors: dataErrors },
 		reset: resetData,
 	} = useForm<Omit<Data, 'id'>>()
 
-	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-		reset,
-	} = useForm<Player>()
+	const { register, handleSubmit, reset } = useForm<Player>()
 
 	const { mutate } = useMutation({ mutationFn: updateData })
 	const { mutate: mutatePlayer } = useMutation({
@@ -64,6 +61,13 @@ export default function Admin() {
 		label: player.name,
 		value: player.id,
 	}))
+
+	useLayoutEffect(() => {
+		const password = prompt('Пароль')
+		if (password !== PASSWORD) {
+			router.replace('/')
+		}
+	}, [])
 
 	useEffect(() => {
 		if (data) {
