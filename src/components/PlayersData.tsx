@@ -49,10 +49,13 @@ export const PlayersData = ({ userId }: { userId: number }) => {
 		},
 	})
 
-	const canOpenCharacteristic = () => {
+	const canOpenCharacteristic = (characteristicKey?: string) => {
+		if (characteristicKey?.includes('Карточка')) return true
+
 		if (!round || !currentPlayer || isPlayerLoading || isRoundLoading) {
 			return false
 		}
+
 		return (
 			round.isStarted &&
 			round.activePlayer === userId &&
@@ -61,10 +64,11 @@ export const PlayersData = ({ userId }: { userId: number }) => {
 	}
 
 	const openCharacteristic = (characteristic: string) => {
-		if (!currentPlayer || !round || !canOpenCharacteristic()) return
+		if (!currentPlayer || !round || !canOpenCharacteristic(characteristic))
+			return
 
-		const openedSet = new Set(currentPlayer.opened)
-		if (openedSet.has(characteristic)) return // уже открыто
+		const openedSet = new Set(currentPlayer?.opened)
+		if (openedSet.has(characteristic)) return
 
 		const updatedOpened = [...openedSet, characteristic].join(',') + ','
 
@@ -73,10 +77,14 @@ export const PlayersData = ({ userId }: { userId: number }) => {
 			opened: updatedOpened,
 		})
 
-		mutateUpdateRound({
-			...round,
-			activePlayerOpened: round.activePlayerOpened + 1,
-		})
+		if (!characteristic.includes('Карточка')) {
+			mutateUpdateRound({
+				...round,
+				activePlayerOpened: round?.activePlayerOpened
+					? round?.activePlayerOpened + 1
+					: 1,
+			})
+		}
 	}
 
 	return (
@@ -104,7 +112,7 @@ export const PlayersData = ({ userId }: { userId: number }) => {
 									<span className='font-bold self-center'>{char.key}</span>
 									{userId === player.id && !opened.has(char.key) ? (
 										<button
-											disabled={!canOpenCharacteristic()}
+											disabled={!canOpenCharacteristic(char.key)}
 											className='text-left bg-zinc-700 p-2 rounded hover:bg-zinc-600 disabled:bg-zinc-700 disabled:text-gray-300 duration-300'
 											onClick={() => openCharacteristic(char.key)}
 										>

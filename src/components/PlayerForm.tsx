@@ -34,6 +34,8 @@ type Characters =
 	| 'Инвентарь'
 	| 'Характер'
 	| 'Доп инфа'
+	| 'Карточка 1'
+	| 'Карточка 2'
 
 const characters: Characters[] = [
 	'Пол',
@@ -46,6 +48,8 @@ const characters: Characters[] = [
 	'Инвентарь',
 	'Характер',
 	'Доп инфа',
+	'Карточка 1',
+	'Карточка 2',
 ]
 
 const initialOption = { label: '', value: 0 }
