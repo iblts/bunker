@@ -65,7 +65,7 @@ export const PlayerForm = () => {
 		queryKey: ['adminPlayer'],
 		queryFn: getPlayers,
 		refetchOnWindowFocus: false,
-		refetchInterval: 100000,
+		refetchInterval: 10000,
 	})
 
 	const {
