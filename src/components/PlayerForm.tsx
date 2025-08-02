@@ -64,7 +64,7 @@ export const PlayerForm = () => {
 	const { data: players } = useQuery({
 		queryKey: ['adminPlayer'],
 		queryFn: getPlayers,
-		refetchOnWindowFocus: false,
+		refetchOnWindowFocus: true,
 		refetchInterval: 10000,
 	})
 

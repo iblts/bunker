@@ -20,7 +20,7 @@ CHARACTERISTICS.set('phobia', 'Фобия')
 
 export const characteristics = {
 	sex: ['Мужчина', 'Женщина'],
-	age: ['Плоден', 'Бесплоден'],
+	age: ['Плоден', 'Бесплоден', 'Плоден'],
 	height: [
 		'Толстый',
 		'Дрищ',
