@@ -10,12 +10,28 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-	const data = await prisma.data.update({
-		where: {
-			id: 1,
-		},
-		data: await request.json(),
-	})
+	try {
+		const json = await request.json()
 
-	return NextResponse.json(data)
+		if (!json) {
+			return NextResponse.json(
+				{ message: 'Неверное тело запроса' },
+				{ status: 400 }
+			)
+		}
+
+		const data = await prisma.data.update({
+			where: {
+				id: 1,
+			},
+			data: json,
+		})
+
+		return NextResponse.json(data, { status: 200 })
+	} catch (error) {
+		return NextResponse.json(
+			{ message: 'Ошибка при обработке запроса' },
+			{ status: 500 }
+		)
+	}
 }

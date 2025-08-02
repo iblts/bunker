@@ -21,6 +21,9 @@ model Player {
   character  String?
   inventory  String?
   extra      String?
+  card1      String?
+  card2      String?
+  opened     String?
 }
 
 model Data {
@@ -32,4 +35,13 @@ model Data {
   rooms   String?
   problem String?
   extra   String?
+}
+
+model Round {
+  id                 Int     @id @default(autoincrement())
+  isStarted          Boolean @default(false)
+  mustOpen           Int     @default(3)
+  players            String?
+  activePlayer       Int?
+  activePlayerOpened Int
 }
