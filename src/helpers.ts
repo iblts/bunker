@@ -1,8 +1,9 @@
 import type { Data, Player } from '@/lib/generated/prisma-client'
 import { bunker, characteristics } from './constants'
+import type { Characters, Option, PlayerCharacteristics } from './types'
 
 export const playerDto = (player: Player) => {
-	const characteristics = [
+	const characteristics: { key: Characters; value: string | null }[] = [
 		{ key: 'Пол', value: player.sex },
 		{ key: 'Возраст', value: player.age },
 		{ key: 'Профессия', value: player.profession },
@@ -25,7 +26,12 @@ export const playerDto = (player: Player) => {
 	}
 }
 
-const getNoun = (number: number, one: string, two: string, five: string) => {
+export const getNoun = (
+	number: number,
+	one: string,
+	two: string,
+	five: string
+) => {
 	let n = Math.abs(number)
 	n %= 100
 	if (n >= 5 && n <= 20) {
@@ -45,106 +51,156 @@ const getRandom = (min: number, max: number) =>
 	Math.floor(Math.random() * (max - min + 1)) + min
 const getRandomFromArray = <T>(array: T[]) =>
 	array[Math.floor(Math.random() * array.length)]
+const getRandomRange = (
+	ranges = [
+		{ min: 30, max: 40, weight: 25 },
+		{ min: 20, max: 30, weight: 20 },
+		{ min: 40, max: 50, weight: 20 },
+		{ min: 14, max: 20, weight: 15 },
+		{ min: 50, max: 60, weight: 15 },
+		{ min: 60, max: 100, weight: 5 },
+	]
+) => {
+	const totalWeight = ranges.reduce((sum, r) => sum + r.weight, 0)
+	const random = Math.random() * totalWeight
 
-export const generateHealth = () => {
-	const disease = getRandomFromArray(characteristics.health)
-	const health =
-		disease === 'Идеально здоров'
-			? disease
-			: `${disease} (${getRandom(1, 10) * 10}%)`
+	let cumulative = 0
+	let selectedRange = ranges[0]
 
-	return health
-}
-export const generateHeight = () =>
-	`${getRandom(140, 210)}см, ${getRandomFromArray(characteristics.height)}`
-export const generateCharacter = () =>
-	getRandomFromArray(characteristics.character)
-export const generateExtra = () => getRandomFromArray(characteristics.extra)
-export const generateInventory = () =>
-	getRandomFromArray(characteristics.inventory)
-export const generatePhobia = () => getRandomFromArray(characteristics.phobia)
-export const generateHobby = () => getRandomFromArray(characteristics.hobby)
-export const generateAge = (sex: string) => {
-	const ageNumber = getRandom(14, 100)
-	const age = `${ageNumber} ${getNoun(ageNumber, 'год', 'года', 'лет')}, ${
-		ageNumber > 54 ? 'Бесплоден' : getRandomFromArray(characteristics.age)
-	}`
-
-	return age
-}
-export const generateSex = () => getRandomFromArray(characteristics.sex)
-export const generateProfession = (age: string) => {
-	const experience = getRandom(0, Number(age.split(' ')[0]) - 10)
-	const profession = `${getRandomFromArray(
-		characteristics.professions
-	)}, ${experience} ${getNoun(experience, 'год', 'года', 'лет')}`
-
-	return profession
-}
-export const generateCard = () => getRandomFromArray(characteristics.cards)
-
-export const createCharacter = (): Pick<
-	Player,
-	| 'age'
-	| 'character'
-	| 'extra'
-	| 'health'
-	| 'height'
-	| 'hobby'
-	| 'inventory'
-	| 'phobia'
-	| 'profession'
-	| 'sex'
-	| 'card1'
-	| 'card2'
-> => {
-	const sex = generateSex()
-	const age = generateAge(sex)
-
-	return {
-		age: age,
-		character: generateCharacter(),
-		extra: generateExtra(),
-		health: generateHealth(),
-		height: generateHeight(),
-		hobby: generateHobby(),
-		inventory: generateInventory(),
-		phobia: generatePhobia(),
-		profession: generateProfession(age),
-		sex,
-		card1: generateCard(),
-		card2: generateCard(),
+	for (const range of ranges) {
+		cumulative += range.weight
+		if (random < cumulative) {
+			selectedRange = range
+			break
+		}
 	}
+
+	return selectedRange
 }
 
-export const generateFood = () => getRandomFromArray(bunker.food)
-export const generatePlace = () => getRandomFromArray(bunker.place)
-export const generateProblem = () => getRandomFromArray(bunker.disaster)
-export const generateRooms = () =>
-	new Array(4)
-		.fill('')
-		.map(() => getRandomFromArray(bunker.rooms))
-		.join(', ')
-export const generateSize = () => getRandomFromArray(bunker.size)
-export const generateTime = () => getRandomFromArray(bunker.time)
+export const generatePlayer = {
+	health: () => {
+		const disease = getRandomFromArray(characteristics.health)
+		const health =
+			disease === 'Идеально здоров'
+				? disease
+				: `${disease} (${getRandom(1, 10) * 10}%)`
 
-export const createData = (): Omit<Data, 'id'> => {
-	return {
-		extra: '',
-		food: generateFood(),
-		place: generatePlace(),
-		problem: generateProblem(),
-		rooms: generateRooms(),
-		size: generateSize(),
-		time: generateTime(),
-	}
+		return health
+	},
+	height: () =>
+		`${getRandom(140, 210)}см, ${getRandomFromArray(characteristics.height)}`,
+	character: () => getRandomFromArray(characteristics.character),
+	extra: () => getRandomFromArray(characteristics.extra),
+	inventory: () => getRandomFromArray(characteristics.inventory),
+	phobia: () => getRandomFromArray(characteristics.phobia),
+	hobby: () => getRandomFromArray(characteristics.hobby),
+	age: () => {
+		const range = getRandomRange()
+		const ageNumber = getRandom(range.min, range.max)
+
+		const experienceRange = getRandomRange([
+			{ min: 0, max: Math.min(2, ageNumber - 10), weight: 20 },
+			{
+				min: Math.min(2, ageNumber - 10),
+				max: Math.min(5, ageNumber - 10),
+				weight: 35,
+			},
+			{
+				min: Math.min(5, ageNumber - 10),
+				max: Math.min(10, ageNumber - 10),
+				weight: 20,
+			},
+			{
+				min: Math.min(10, ageNumber - 10),
+				max: Math.min(20, ageNumber - 10),
+				weight: 15,
+			},
+			{
+				min: Math.min(20, ageNumber - 10),
+				max: ageNumber - 10,
+				weight: 10,
+			},
+		])
+		const experience = getRandom(experienceRange.min, experienceRange.max)
+		const age = `${ageNumber} ${getNoun(
+			ageNumber,
+			'год',
+			'года',
+			'лет'
+		)}, стаж ${experience} ${getNoun(experience, 'год', 'года', 'лет')}, ${
+			ageNumber > 54 ? 'Бесплоден' : getRandomFromArray(characteristics.age)
+		}`
+
+		return age
+	},
+	sex: () => getRandomFromArray(characteristics.sex),
+	profession: () => getRandomFromArray(characteristics.professions),
+	card: () => getRandomFromArray(characteristics.cards),
+	all: (): PlayerCharacteristics => {
+		const age = generatePlayer.age()
+
+		return {
+			age: age,
+			character: generatePlayer.character(),
+			extra: generatePlayer.extra(),
+			health: generatePlayer.health(),
+			height: generatePlayer.height(),
+			hobby: generatePlayer.hobby(),
+			inventory: generatePlayer.inventory(),
+			phobia: generatePlayer.phobia(),
+			profession: generatePlayer.profession(),
+			sex: generatePlayer.sex(),
+			card1: generatePlayer.card(),
+			card2: generatePlayer.card(),
+		}
+	},
+}
+
+export const generateData = {
+	food: () => getRandomFromArray(bunker.food),
+	place: () => getRandomFromArray(bunker.place),
+	problem: () => getRandomFromArray(bunker.disaster),
+	rooms: () =>
+		new Array(4)
+			.fill('')
+			.map(() => getRandomFromArray(bunker.rooms))
+			.join(', '),
+	size: () => getRandomFromArray(bunker.size),
+	time: () => getRandomFromArray(bunker.time),
+	all: (): Omit<Data, 'id'> => {
+		return {
+			extra: '',
+			food: generateData.food(),
+			place: generateData.place(),
+			problem: generateData.problem(),
+			rooms: generateData.rooms(),
+			size: generateData.size(),
+			time: generateData.time(),
+		}
+	},
 }
 
 export const generateNewPlayerData = (player: Player): Player => {
-	const newCharacter = createCharacter()
+	const newCharacter = generatePlayer.all()
 	return {
 		...player,
 		...newCharacter,
 		opened: '',
 	}
 }
+
+export const swapField = <T extends keyof Player>(
+	player1: Player,
+	player2: Player,
+	field: T
+) => {
+	const temp = player1[field]
+	player1[field] = player2[field]
+	player2[field] = temp
+}
+
+export const playerToOptionDto = (player: Player): Option => ({
+	value: String(player.id),
+	label: player.name ?? '',
+})

@@ -1,5 +1,6 @@
 import { Data, Player, Round } from '../lib/generated/prisma-client'
 import { BASE_URL } from './constants'
+import { ConditionalResponse, SwapCharsBody } from './types'
 
 export const getPlayers = async () => {
 	const res = await fetch(`${BASE_URL}/api/players`)
@@ -153,16 +154,6 @@ export const updateRound = async (body: Partial<Round>) => {
 	return data as Round
 }
 
-interface AdminAuthSuccess {
-	success: true
-	message: never
-}
-
-interface AdminAuthFailure {
-	success: false
-	message: string
-}
-
 export const adminAuth = async (body: { password: string }) => {
 	const res = await fetch(`${BASE_URL}/api/auth/admin`, {
 		method: 'POST',
@@ -170,5 +161,24 @@ export const adminAuth = async (body: { password: string }) => {
 	})
 	const data = await res.json()
 
-	return data as AdminAuthFailure | AdminAuthSuccess
+	return data as ConditionalResponse
+}
+
+export const swapPlayerChars = async (body: SwapCharsBody) => {
+	const res = await fetch(`${BASE_URL}/api/players/swap-chars`, {
+		method: 'POST',
+		body: JSON.stringify(body),
+	})
+	let data
+	try {
+		data = await res.json()
+	} catch {
+		throw new Error('Ошибка разбора ответа сервера')
+	}
+
+	if (!res.ok) {
+		throw new Error(data?.message || 'Ошибка при обновлении данных')
+	}
+
+	return data as ConditionalResponse
 }

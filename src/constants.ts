@@ -1,22 +1,43 @@
-import { StylesConfig } from 'react-select'
+import type { StylesConfig } from 'react-select'
 import type { Player } from '../lib/generated/prisma-client'
+import type { Characters, Option } from './types'
 
 export const BASE_URL = process.env.BASE_URL ?? process.env.NEXT_PUBLIC_BASE_URL
 export const PASSWORD = process.env.PASSWORD
 export const COOKIE_KEY_USER_ID = 'bunker-game-user-id'
-export const CHARACTERISTICS: Map<keyof Player, string> = new Map()
+export const PLAYER_FIELDS_LABELS_MAP: Map<keyof Player, string> = new Map([
+	['name', 'Имя'],
+	['sex', 'Пол'],
+	['profession', 'Профессия'],
+	['health', 'Здоровье'],
+	['age', 'Возраст'],
+	['height', 'Рост'],
+	['character', 'Характер'],
+	['extra', 'Доп инфа'],
+	['hobby', 'Хобби'],
+	['inventory', 'Инвентарь'],
+	['phobia', 'Фобия'],
+	['card1', 'Карточка 1'],
+	['card2', 'Карточка 2'],
+])
+export const CHARACTERISTICS_OPTIONS: Option[] = Array.from(
+	PLAYER_FIELDS_LABELS_MAP.entries()
+).map(([value, label]) => ({ value, label }))
 
-CHARACTERISTICS.set('name', 'Имя')
-CHARACTERISTICS.set('sex', 'Пол')
-CHARACTERISTICS.set('profession', 'Профессия')
-CHARACTERISTICS.set('health', 'Здоровье')
-CHARACTERISTICS.set('age', 'Возраст')
-CHARACTERISTICS.set('height', 'Рост')
-CHARACTERISTICS.set('character', 'Характер')
-CHARACTERISTICS.set('extra', 'Доп инфа')
-CHARACTERISTICS.set('hobby', 'Хобби')
-CHARACTERISTICS.set('inventory', 'Инвентарь')
-CHARACTERISTICS.set('phobia', 'Фобия')
+export const characters: Characters[] = [
+	'Пол',
+	'Возраст',
+	'Профессия',
+	'Здоровье',
+	'Рост',
+	'Фобия',
+	'Хобби',
+	'Инвентарь',
+	'Характер',
+	'Доп инфа',
+	'Карточка 1',
+	'Карточка 2',
+]
 
 export const characteristics = {
 	sex: ['Мужчина', 'Женщина'],
@@ -49,6 +70,7 @@ export const characteristics = {
 		'Хромота',
 		'Астма',
 		'Диабет',
+		'Идеально здоров',
 		'Язва желудка',
 		'Хроническая диарея',
 		'Гастрит',
@@ -59,12 +81,14 @@ export const characteristics = {
 		'Нет обеих ног',
 		'Хроническая мигрень',
 		'Проблемы с почками',
+		'Идеально здоров',
 		'Аллергия на плесень',
 		'Невроз',
 		'Плохое зрение',
 		'Идеально здоров',
 		'Ревматизм',
 		'Сколиоз',
+		'Идеально здоров',
 		'Хроническая усталость',
 		'Проблемы с зубами',
 		'Лёгкая аллергия на пищу',
@@ -577,7 +601,7 @@ export const bunker = {
 	],
 }
 
-export const colourStyles: StylesConfig = {
+export const selectStyles: StylesConfig<Option, false> = {
 	control: (styles, { isFocused }) => ({
 		...styles,
 		backgroundColor: '#27272A',
@@ -629,3 +653,5 @@ export const colourStyles: StylesConfig = {
 		},
 	}),
 }
+
+export const initialOption: Option = { label: '', value: '' }

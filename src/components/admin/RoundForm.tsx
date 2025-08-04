@@ -5,23 +5,20 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
-import { getPlayers, getRound, updateRound } from '../api'
-import { colourStyles } from '../constants'
+import { getPlayers, getRound, updateRound } from '../../api'
+import { selectStyles } from '../../constants'
+import { Option } from '../../types'
 
-const initialOption = { label: '', value: 0 }
+type RoundFormFields = Pick<Round, 'mustOpen' | 'activePlayer'>
 
 export const RoundForm = () => {
-	const [selectedPlayer, setSelectedPlayer] = useState<{
-		label: string
-		value: number
-	}>(initialOption)
 	const [isStarted, setStarted] = useState(false)
 
 	const { data: round } = useQuery({
 		queryKey: ['adminRound'],
 		queryFn: getRound,
-		refetchOnWindowFocus: false,
-		refetchInterval: 100000,
+		refetchOnWindowFocus: true,
+		refetchInterval: 30000,
 	})
 
 	const { data: players } = useQuery({
@@ -29,14 +26,19 @@ export const RoundForm = () => {
 		queryFn: getPlayers,
 		refetchOnWindowFocus: false,
 		refetchInterval: 100000,
+		initialData: [],
 	})
+
+	const { register, handleSubmit, reset, getValues, setValue, watch } =
+		useForm<RoundFormFields>()
+
+	const selectedPlayerId = watch('activePlayer')
 
 	const { mutate: mutateRound } = useMutation({
 		mutationFn: updateRound,
 		onSuccess: () => {
 			queryClient.refetchQueries({ queryKey: ['adminPlayer'] })
 			queryClient.refetchQueries({ queryKey: ['adminRound'] })
-			setSelectedPlayer(initialOption)
 			toast.success('Данные успешно обновлены!')
 		},
 		onError: (error: Error) => {
@@ -44,63 +46,46 @@ export const RoundForm = () => {
 		},
 	})
 
-	const { register, handleSubmit, reset, getValues } =
-		useForm<Pick<Round, 'mustOpen'>>()
-
-	useEffect(() => {
-		if (players && players.length > 0) {
-			setSelectedPlayer({
-				value: players[0]?.id ?? 0,
-				label: players[0]?.name ?? '',
-			})
-		}
-	}, [players])
-
 	useEffect(() => {
 		if (round) {
-			reset({ mustOpen: round.mustOpen })
-			setStarted(round.isStarted)
-			setSelectedPlayer({
-				value: round.activePlayer ?? 0,
-				label:
-					players?.find(player => player.id === round.activePlayer)?.name ?? '',
+			reset({
+				mustOpen: round.mustOpen,
+				activePlayer: round.activePlayer ?? players[0]?.id ?? 0,
 			})
+			setStarted(round.isStarted)
 		}
-	}, [round, reset])
+	}, [round, players, reset])
 
-	const options = players?.map(player => ({
-		label: player.name,
-		value: player.id,
+	const options: Option[] = players.map(player => ({
+		label: player.name ?? '',
+		value: String(player.id),
 	}))
 
-	const onSubmit = (formData: Pick<Round, 'mustOpen'>) => {
+	const onSubmit = (formData: RoundFormFields) => {
 		mutateRound({
 			...round,
 			...formData,
-			activePlayer: selectedPlayer.value,
 			isStarted,
 		})
 	}
 
 	const handleStart = () => {
-		const { mustOpen } = getValues()
+		const form = getValues()
 		mutateRound({
 			...round,
-			mustOpen,
+			...form,
 			isStarted: true,
-			activePlayer: selectedPlayer.value,
 			activePlayerOpened: 0,
 		})
 		setStarted(true)
 	}
 
 	const handleStop = () => {
-		const { mustOpen } = getValues()
+		const form = getValues()
 		mutateRound({
 			...round,
-			mustOpen,
+			...form,
 			isStarted: false,
-			activePlayer: selectedPlayer.value,
 			activePlayerOpened: 0,
 		})
 		setStarted(false)
@@ -109,6 +94,7 @@ export const RoundForm = () => {
 	return (
 		<div>
 			<form onSubmit={handleSubmit(onSubmit)} className='grid gap-4'>
+				<h2 className='text-2xl'>Раунд</h2>
 				<label className='grid grid-cols-[auto_350px] gap-2 items-center w-full'>
 					Количество характеристик
 					<input
@@ -122,14 +108,15 @@ export const RoundForm = () => {
 				</label>
 				<label className='grid grid-cols-[auto_350px] gap-2 items-center w-full'>
 					Игрок
-					<Select
-						value={selectedPlayer}
-						onChange={option => {
-							if (option)
-								setSelectedPlayer(option as { label: string; value: number })
-						}}
+					<Select<Option>
+						value={
+							options.find(option => +option.value === selectedPlayerId) ?? null
+						}
+						onChange={option =>
+							option && setValue('activePlayer', +option.value)
+						}
 						options={options}
-						styles={colourStyles}
+						styles={selectStyles}
 					/>
 				</label>
 				<div className='flex gap-4'>

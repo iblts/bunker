@@ -5,59 +5,15 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import Select from 'react-select'
-import { createPlayer, deletePlayer, getPlayers, updatePlayer } from '../api'
-import { colourStyles } from '../constants'
-import {
-	createCharacter,
-	generateAge,
-	generateCard,
-	generateCharacter,
-	generateExtra,
-	generateHealth,
-	generateHeight,
-	generateHobby,
-	generateInventory,
-	generateNewPlayerData,
-	generatePhobia,
-	generateProfession,
-	generateSex,
-} from '../helpers'
-
-type Characters =
-	| 'Пол'
-	| 'Возраст'
-	| 'Профессия'
-	| 'Здоровье'
-	| 'Рост'
-	| 'Фобия'
-	| 'Хобби'
-	| 'Инвентарь'
-	| 'Характер'
-	| 'Доп инфа'
-	| 'Карточка 1'
-	| 'Карточка 2'
-
-const characters: Characters[] = [
-	'Пол',
-	'Возраст',
-	'Профессия',
-	'Здоровье',
-	'Рост',
-	'Фобия',
-	'Хобби',
-	'Инвентарь',
-	'Характер',
-	'Доп инфа',
-	'Карточка 1',
-	'Карточка 2',
-]
-
-const initialOption = { label: '', value: 0 }
+import { createPlayer, deletePlayer, getPlayers, updatePlayer } from '../../api'
+import { characters, initialOption, selectStyles } from '../../constants'
+import { generateNewPlayerData, generatePlayer } from '../../helpers'
+import type { Characters, Option } from '../../types'
 
 export const PlayerForm = () => {
 	const [selectedPlayer, setSelectedPlayer] = useState<{
 		label: string
-		value: number
+		value: string
 	}>(initialOption)
 	const [checkedChars, setChecketChars] = useState<Characters[]>([])
 
@@ -66,6 +22,7 @@ export const PlayerForm = () => {
 		queryFn: getPlayers,
 		refetchOnWindowFocus: true,
 		refetchInterval: 10000,
+		initialData: [],
 	})
 
 	const {
@@ -107,12 +64,12 @@ export const PlayerForm = () => {
 		},
 	})
 
-	const options = players?.map(player => ({
+	const options = players.map(player => ({
 		label: player.name ?? '',
-		value: player.id,
+		value: String(player.id),
 	}))
 
-	const player = players?.find(p => p.id === selectedPlayer.value)
+	const player = players?.find(p => p.id === +selectedPlayer.value)
 
 	const distributeRolesToAllPlayers = async () => {
 		if (!players) return
@@ -133,8 +90,8 @@ export const PlayerForm = () => {
 	useEffect(() => {
 		if (players && players.length > 0) {
 			setSelectedPlayer(prev =>
-				prev.value === 0
-					? { value: players[0]?.id, label: players[0]?.name ?? '' }
+				+prev.value === 0
+					? { value: String(players[0]?.id), label: players[0]?.name ?? '' }
 					: prev
 			)
 		}
@@ -145,11 +102,11 @@ export const PlayerForm = () => {
 			reset(player)
 			setChecketChars((player.opened?.split(',') as Characters[]) ?? [])
 		}
-	}, [player])
+	}, [player, reset])
 
 	const generateChars = () => {
-		const generatedCharacter = createCharacter()
-		reset({ ...generatedCharacter, id: selectedPlayer.value })
+		const generatedCharacter = generatePlayer.all()
+		reset({ ...generatedCharacter, id: +selectedPlayer.value })
 		setChecketChars([])
 	}
 
@@ -180,20 +137,19 @@ export const PlayerForm = () => {
 				</button>
 				<button
 					className='uppercase block px-4 py-2 bg-zinc-800 hover:bg-zinc-600 duration-300 mb-4 rounded'
-					onClick={() => mutateDeletePlayer(selectedPlayer.value)}
+					onClick={() => mutateDeletePlayer(+selectedPlayer.value)}
 				>
 					Удалить игрока
 				</button>
 			</div>
 
-			<Select
+			<Select<Option>
 				value={selectedPlayer}
 				onChange={option => {
-					if (option)
-						setSelectedPlayer(option as { label: string; value: number })
+					if (option) setSelectedPlayer(option)
 				}}
 				options={options}
-				styles={colourStyles}
+				styles={selectStyles}
 			/>
 
 			<form onSubmit={handleSubmit(savePlayer)} className='grid gap-4 p-4'>
@@ -208,6 +164,25 @@ export const PlayerForm = () => {
 				</label>
 				<div className='grid grid-cols-[1fr_142px] gap-2 items-center'>
 					<label className='grid grid-cols-[1fr_auto] gap-2 items-center'>
+						Профессия
+						<input
+							className='bg-zinc-800 p-2 rounded w-full'
+							type='text'
+							{...register('profession')}
+							placeholder='Профессия'
+						/>
+					</label>
+					<button
+						onClick={() => {
+							setPlayerValue('profession', generatePlayer.profession())
+						}}
+						className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'
+					>
+						Пересоздать
+					</button>
+				</div>
+				<div className='grid grid-cols-[1fr_142px] gap-2 items-center'>
+					<label className='grid grid-cols-[1fr_auto] gap-2 items-center'>
 						Возраст
 						<input
 							className='bg-zinc-800 p-2 rounded w-full'
@@ -217,8 +192,9 @@ export const PlayerForm = () => {
 						/>
 					</label>
 					<button
+						type='button'
 						onClick={() => {
-							setPlayerValue('age', generateAge(player?.sex ?? ''))
+							setPlayerValue('age', generatePlayer.age())
 						}}
 						className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'
 					>
@@ -237,7 +213,7 @@ export const PlayerForm = () => {
 					</label>
 					<button
 						onClick={() => {
-							setPlayerValue('health', generateHealth())
+							setPlayerValue('health', generatePlayer.health())
 						}}
 						className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'
 					>
@@ -256,7 +232,7 @@ export const PlayerForm = () => {
 					</label>
 					<button
 						onClick={() => {
-							setPlayerValue('character', generateCharacter())
+							setPlayerValue('character', generatePlayer.character())
 						}}
 						className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'
 					>
@@ -275,7 +251,7 @@ export const PlayerForm = () => {
 					</label>
 					<button
 						onClick={() => {
-							setPlayerValue('extra', generateExtra())
+							setPlayerValue('extra', generatePlayer.extra())
 						}}
 						className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'
 					>
@@ -294,7 +270,7 @@ export const PlayerForm = () => {
 					</label>
 					<button
 						onClick={() => {
-							setPlayerValue('height', generateHeight())
+							setPlayerValue('height', generatePlayer.height())
 						}}
 						className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'
 					>
@@ -313,7 +289,7 @@ export const PlayerForm = () => {
 					</label>
 					<button
 						onClick={() => {
-							setPlayerValue('hobby', generateHobby())
+							setPlayerValue('hobby', generatePlayer.hobby())
 						}}
 						className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'
 					>
@@ -332,7 +308,7 @@ export const PlayerForm = () => {
 					</label>
 					<button
 						onClick={() => {
-							setPlayerValue('inventory', generateInventory())
+							setPlayerValue('inventory', generatePlayer.inventory())
 						}}
 						className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'
 					>
@@ -351,29 +327,7 @@ export const PlayerForm = () => {
 					</label>
 					<button
 						onClick={() => {
-							setPlayerValue('phobia', generatePhobia())
-						}}
-						className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'
-					>
-						Пересоздать
-					</button>
-				</div>
-				<div className='grid grid-cols-[1fr_142px] gap-2 items-center'>
-					<label className='grid grid-cols-[1fr_auto] gap-2 items-center'>
-						Профессия
-						<input
-							className='bg-zinc-800 p-2 rounded w-full'
-							type='text'
-							{...register('profession')}
-							placeholder='Профессия'
-						/>
-					</label>
-					<button
-						onClick={() => {
-							setPlayerValue(
-								'profession',
-								generateProfession(player?.age ?? '20 ')
-							)
+							setPlayerValue('phobia', generatePlayer.phobia())
 						}}
 						className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'
 					>
@@ -392,7 +346,7 @@ export const PlayerForm = () => {
 					</label>
 					<button
 						onClick={() => {
-							setPlayerValue('sex', generateSex())
+							setPlayerValue('sex', generatePlayer.sex())
 						}}
 						className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'
 					>
@@ -411,7 +365,7 @@ export const PlayerForm = () => {
 					</label>
 					<button
 						onClick={() => {
-							setPlayerValue('card1', generateCard())
+							setPlayerValue('card1', generatePlayer.card())
 						}}
 						className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'
 					>
@@ -430,32 +384,40 @@ export const PlayerForm = () => {
 					</label>
 					<button
 						onClick={() => {
-							setPlayerValue('card2', generateCard())
+							setPlayerValue('card2', generatePlayer.card())
 						}}
 						className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'
 					>
 						Пересоздать
 					</button>
 				</div>
-				{characters.map((character, i) => (
-					<label
-						className='grid grid-cols-[1fr_auto] gap-2 items-center'
-						key={i}
-					>
-						{character}
-						<input
-							type='checkbox'
-							checked={checkedChars.includes(character)}
-							onChange={() =>
-								checkedChars.includes(character)
-									? setChecketChars(prev =>
-											prev.filter(char => char !== character)
-									  )
-									: setChecketChars(prev => [...prev, character])
-							}
-						/>
-					</label>
-				))}
+				<div className='grid gap-1'>
+					{characters.map((character, i) => {
+						const checked = checkedChars.includes(character)
+						const handleChange = () =>
+							checkedChars.includes(character)
+								? setChecketChars(prev =>
+										prev.filter(char => char !== character)
+								  )
+								: setChecketChars(prev => [...prev, character])
+
+						return (
+							<label
+								className={`grid grid-cols-[1fr_auto] p-2 gap-2 items-center hover:bg-zinc-800 duration-500 rounded cursor-pointer${
+									checked ? ' bg-zinc-900' : ''
+								}`}
+								key={i}
+							>
+								{character}
+								<input
+									type='checkbox'
+									checked={checked}
+									onChange={handleChange}
+								/>
+							</label>
+						)
+					})}
+				</div>
 				<button
 					type='submit'
 					className='px-4 py-3 bg-zinc-800 hover:bg-zinc-600 duration-300 rounded'

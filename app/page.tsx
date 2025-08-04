@@ -1,5 +1,5 @@
 import { getPlayerById } from '@/src/api'
-import { MainPage } from '@/src/components/MainPage'
+import { MainPage } from '@/src/components/main/MainPage'
 import { COOKIE_KEY_USER_ID } from '@/src/constants'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'

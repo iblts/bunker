@@ -1,9 +1,10 @@
 'use client'
 
 import { adminAuth } from '@/src/api'
-import { DataForm } from '@/src/components/DataForm'
-import { PlayerForm } from '@/src/components/PlayerForm'
-import { RoundForm } from '@/src/components/RoundForm'
+import { DataForm } from '@/src/components/admin/DataForm'
+import { PlayerForm } from '@/src/components/admin/PlayerForm'
+import { RoundForm } from '@/src/components/admin/RoundForm'
+import { SwapForm } from '@/src/components/admin/SwapForm'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useLayoutEffect } from 'react'
@@ -37,13 +38,16 @@ export default function Admin() {
 			}
 		}
 		fetchAuth()
-	}, [])
+	}, [mutateAsync, router])
 
 	return (
 		<div className='p-20 flex gap-[100px] justify-items-center'>
 			<DataForm />
 			<PlayerForm />
-			<RoundForm />
+			<div className='flex flex-col gap-8'>
+				<RoundForm />
+				<SwapForm />
+			</div>
 		</div>
 	)
 }
