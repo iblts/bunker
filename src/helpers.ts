@@ -204,3 +204,14 @@ export const playerToOptionDto = (player: Player): Option => ({
 	value: String(player.id),
 	label: player.name ?? '',
 })
+
+export const getIndexToSwap = <T>(index: number, array: T[]) => {
+	if (index - 1 > -1) return index - 1
+	return array.length - 1
+}
+
+export const getErrorMessage = (error: unknown) => {
+	if (!error) return ''
+	if (typeof error === 'object' && 'message' in error) return error.message
+	return ''
+}

@@ -1,6 +1,6 @@
 import type { StylesConfig } from 'react-select'
 import type { Player } from '../lib/generated/prisma-client'
-import type { Characters, Option } from './types'
+import type { Characters, Option, PlayerCharacteristics } from './types'
 
 export const BASE_URL = process.env.BASE_URL ?? process.env.NEXT_PUBLIC_BASE_URL
 export const PASSWORD = process.env.PASSWORD
@@ -20,9 +20,28 @@ export const PLAYER_FIELDS_LABELS_MAP: Map<keyof Player, string> = new Map([
 	['card1', 'Карточка 1'],
 	['card2', 'Карточка 2'],
 ])
-export const CHARACTERISTICS_OPTIONS: Option[] = Array.from(
-	PLAYER_FIELDS_LABELS_MAP.entries()
-).map(([value, label]) => ({ value, label }))
+export const CHARACTERISTICS_OPTIONS: Option<keyof PlayerCharacteristics>[] =
+	Array.from(PLAYER_FIELDS_LABELS_MAP.entries())
+		.filter(([value]) =>
+			[
+				'sex',
+				'age',
+				'height',
+				'profession',
+				'health',
+				'hobby',
+				'phobia',
+				'character',
+				'inventory',
+				'extra',
+				'card1',
+				'card2',
+			].includes(value as string)
+		)
+		.map(([value, label]) => ({
+			value: value as keyof PlayerCharacteristics,
+			label,
+		}))
 
 export const characters: Characters[] = [
 	'Пол',
@@ -601,7 +620,7 @@ export const bunker = {
 	],
 }
 
-export const selectStyles: StylesConfig<Option, false> = {
+export const selectStyles: StylesConfig<Option<any>, false> = {
 	control: (styles, { isFocused }) => ({
 		...styles,
 		backgroundColor: '#27272A',
@@ -654,4 +673,4 @@ export const selectStyles: StylesConfig<Option, false> = {
 	}),
 }
 
-export const initialOption: Option = { label: '', value: '' }
+export const initialOption: Option<''> = { label: '', value: '' } as const

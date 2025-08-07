@@ -1,6 +1,10 @@
 import { Data, Player, Round } from '../lib/generated/prisma-client'
 import { BASE_URL } from './constants'
-import { ConditionalResponse, SwapCharsBody } from './types'
+import {
+	ConditionalResponse,
+	SwapCharsBody,
+	SwapEverybodyCharsBody,
+} from './types'
 
 export const getPlayers = async () => {
 	const res = await fetch(`${BASE_URL}/api/players`)
@@ -166,6 +170,25 @@ export const adminAuth = async (body: { password: string }) => {
 
 export const swapPlayerChars = async (body: SwapCharsBody) => {
 	const res = await fetch(`${BASE_URL}/api/players/swap-chars`, {
+		method: 'POST',
+		body: JSON.stringify(body),
+	})
+	let data
+	try {
+		data = await res.json()
+	} catch {
+		throw new Error('Ошибка разбора ответа сервера')
+	}
+
+	if (!res.ok) {
+		throw new Error(data?.message || 'Ошибка при обновлении данных')
+	}
+
+	return data as ConditionalResponse
+}
+
+export const swapEverobodyChars = async (body: SwapEverybodyCharsBody) => {
+	const res = await fetch(`${BASE_URL}/api/players/swap-every`, {
 		method: 'POST',
 		body: JSON.stringify(body),
 	})

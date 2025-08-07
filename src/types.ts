@@ -1,8 +1,8 @@
 import type { Player } from '@/lib/generated/prisma-client'
 
-export interface Option {
+export interface Option<T extends string = string> {
 	label: string
-	value: string
+	value: T
 }
 
 export type Characters =
@@ -24,6 +24,10 @@ export type PlayerCharacteristics = Omit<Player, 'id' | 'name' | 'opened'>
 export interface SwapCharsBody {
 	player1: number
 	player2: number
+	characteristic: keyof PlayerCharacteristics
+}
+
+export interface SwapEverybodyCharsBody {
 	characteristic: keyof PlayerCharacteristics
 }
 
