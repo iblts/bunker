@@ -16,7 +16,7 @@ export const PlayersData = ({ userId }: { userId: number }) => {
 	} = useQuery({
 		queryKey: ['player'],
 		queryFn: getPlayers,
-		refetchInterval: 15000,
+		refetchInterval: 5000,
 		refetchOnWindowFocus: false,
 	})
 	const {
@@ -150,7 +150,7 @@ export const PlayersData = ({ userId }: { userId: number }) => {
 			}}
 		>
 			<button
-				className='absolute top-4 right-4 p-2 bg-zinc-700 hover:bg-zinc-600 duration-300 rounded disabled:text-zinc-500 disabled:pointer-events-none'
+				className='fixed top-4 right-4 p-2 bg-zinc-700 hover:bg-zinc-600 duration-300 rounded disabled:text-zinc-500 disabled:pointer-events-none'
 				disabled={!canRefetch || isPendingRound || isPendingPlayers}
 				onClick={handleRefetch}
 			>
