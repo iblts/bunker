@@ -150,7 +150,7 @@ export const PlayersData = ({ userId }: { userId: number }) => {
 			}}
 		>
 			<button
-				className='fixed top-4 right-4 p-2 bg-zinc-700 hover:bg-zinc-600 duration-300 rounded disabled:text-zinc-500 disabled:pointer-events-none'
+				className='sticky top-4 right-4 p-2 bg-zinc-700 hover:bg-zinc-600 duration-300 rounded disabled:text-zinc-500 disabled:pointer-events-none'
 				disabled={!canRefetch || isPendingRound || isPendingPlayers}
 				onClick={handleRefetch}
 			>
